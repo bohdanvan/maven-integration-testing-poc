@@ -23,109 +23,58 @@
     </dependencies>
 
     <profiles>
-        <!-- The Configuration of the development profile -->
         <profile>
             <id>dev</id>
-            <activation>
-                <activeByDefault>true</activeByDefault>
-            </activation>
             <properties>
-                <build.profile.id>dev</build.profile.id>
-
-                <!-- Only unit tests are run when the development profile is active -->
-                <skip.integration.tests>true</skip.integration.tests>
-                <skip.unit.tests>false</skip.unit.tests>
+                <test.sourceDirectory>src/test</test.sourceDirectory>
             </properties>
         </profile>
 
-        <!-- The Configuration of the integration-test profile -->
+        <!-- Only integration tests are run when the it profile is active -->
         <profile>
-            <id>integration-test</id>
+            <id>it</id>
             <properties>
-                <build.profile.id>integration-test</build.profile.id>
+                <integration.tests.sourceDirectory>src/integration-test</integration.tests.sourceDirectory>
+                <integration.tests.filePattern>**/ITest*.java</integration.tests.filePattern>
 
-                <!-- Only integration tests are run when the integration-test profile is active -->
-                <skip.integration.tests>false</skip.integration.tests>
-                <skip.unit.tests>true</skip.unit.tests>
+                <test.sourceDirectory>${integration.tests.sourceDirectory}</test.sourceDirectory>
             </properties>
+
+            <build>
+                <testResources>
+                    <testResource>
+                        <directory>${integration.tests.sourceDirectory}/resources</directory>
+                    </testResource>
+                </testResources>
+
+                <plugins>
+                    <!-- Configuration for integration tests -->
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-failsafe-plugin</artifactId>
+                        <version>2.20.1</version>
+                        <executions>
+                            <execution>
+                                <id>integration-tests</id>
+                                <goals>
+                                    <goal>integration-test</goal>
+                                    <goal>verify</goal>
+                                </goals>
+                                <configuration>
+                                    <test>${integration.tests.filePattern}</test>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
         </profile>
     </profiles>
 
     <build>
+        <testSourceDirectory>${test.sourceDirectory}</testSourceDirectory>
+
         <plugins>
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>build-helper-maven-plugin</artifactId>
-                <version>3.0.0</version>
-                <executions>
-                    <!-- Add a new source directory to our build -->
-                    <execution>
-                        <id>add-integration-test-sources</id>
-                        <phase>generate-test-sources</phase>
-                        <goals>
-                            <goal>add-test-source</goal>
-                        </goals>
-                        <configuration>
-                            <sources>
-                                <source>src/integration-test/java</source>
-                            </sources>
-                        </configuration>
-                    </execution>
-
-                    <!-- Add a new resource directory to our build -->
-                    <execution>
-                        <id>add-integration-test-resources</id>
-                        <phase>generate-test-resources</phase>
-                        <goals>
-                            <goal>add-test-resource</goal>
-                        </goals>
-                        <configuration>
-                            <resources>
-                                <resource>
-                                    <directory>src/integration-test/resources</directory>
-                                </resource>
-                            </resources>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-
-            <!-- Configuration for unit tests -->
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-surefire-plugin</artifactId>
-                <version>2.20.1</version>
-                <configuration>
-                    <!-- Skips unit tests if the value of skip.unit.tests property is true -->
-                    <skipTests>${skip.unit.tests}</skipTests>
-                    <!-- Excludes integration tests when unit tests are run -->
-                    <excludes>
-                        <exclude>**/ITest*.java</exclude>
-                    </excludes>
-                </configuration>
-            </plugin>
-
-            <!-- Configuration for integration tests -->
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-failsafe-plugin</artifactId>
-                <version>2.20.1</version>
-                <executions>
-                    <!-- Invokes both the integration-test and the verify goals of the Failsafe Maven plugin -->
-                    <execution>
-                        <id>integration-tests</id>
-                        <goals>
-                            <goal>integration-test</goal>
-                            <goal>verify</goal>
-                        </goals>
-                        <configuration>
-                            <!-- Skips integration tests if the value of skip.integration.tests property is true -->
-                            <skipTests>${skip.integration.tests}</skipTests>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
@@ -136,9 +85,5 @@
                 </configuration>
             </plugin>
         </plugins>
-
-        <filters>
-
-        </filters>
     </build>
 </project>
