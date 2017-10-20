@@ -10,7 +10,7 @@ Integration Testing With Maven
 
 ```
 src
-|---integration-tests
+|---integration-test
 | |---java
 | |---resources
 |   |---application.properties
